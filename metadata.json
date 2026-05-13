@@ -1,0 +1,15 @@
+{
+  "name": "Swastik Daily Cash Manager",
+  "description": "एक आधुनिक हिंदी कैश मैनेजर ऐप छोटे दुकानदारों के लिए। रोज़ाना की बिक्री, खरीदारी और खर्चों का हिसाब रखें।",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "Daily entries tracking",
+    "Auto calculations",
+    "Reports & Analytics",
+    "Firebase backup",
+    "Hindi language support"
+  ]
+}

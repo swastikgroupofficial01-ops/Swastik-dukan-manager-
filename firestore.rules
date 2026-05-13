@@ -1,0 +1,65 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Master Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    // Validation for Daily Entry
+    function isValidDailyEntry(data) {
+      return data.keys().hasAll(['date', 'openingBalance', 'sales', 'purchase', 'expense', 'closingBalance', 'cashInHand', 'userId']) &&
+             data.date is string && data.date.size() <= 20 &&
+             data.openingBalance is number &&
+             data.sales is number &&
+             data.purchase is number &&
+             data.expense is number &&
+             data.closingBalance is number &&
+             data.userId is string && data.userId.size() <= 128;
+    }
+
+    // 2. User Specific Path Hardening
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      
+      match /daily_entries/{entryId} {
+        allow read: if isOwner(userId);
+        
+        allow create: if isOwner(userId) && 
+                      isValidDailyEntry(incoming()) && 
+                      incoming().userId == request.auth.uid &&
+                      isValidId(entryId);
+        
+        allow update: if isOwner(userId) && 
+                      isValidDailyEntry(incoming()) && 
+                      incoming().userId == existing().userId &&
+                      // Action: General Update
+                      incoming().diff(resource.data).affectedKeys().hasOnly(['sales', 'purchase', 'expense', 'closingBalance', 'cashInHand', 'notes', 'updatedAt']);
+        
+        allow delete: if isOwner(userId);
+      }
+
+      match /profile {
+        allow read: if isOwner(userId);
+        allow write: if isOwner(userId);
+      }
+    }
+  }
+}

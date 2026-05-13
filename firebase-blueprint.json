@@ -1,0 +1,44 @@
+{
+  "entities": {
+    "DailyEntry": {
+      "title": "Daily Entry",
+      "description": "Daily record of sales, purchases, and expenses for a shop.",
+      "type": "object",
+      "properties": {
+        "date": { "type": "string", "format": "date", "description": "ISO date string" },
+        "openingBalance": { "type": "number" },
+        "sales": { "type": "number" },
+        "purchase": { "type": "number" },
+        "expense": { "type": "number" },
+        "closingBalance": { "type": "number" },
+        "cashInHand": { "type": "number" },
+        "notes": { "type": "string" },
+        "userId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["date", "openingBalance", "sales", "userId"]
+    },
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Settings and profile info for a shop owner.",
+      "type": "object",
+      "properties": {
+        "mobileNumber": { "type": "string" },
+        "language": { "type": "string", "enum": ["hi", "en"] },
+        "darkMode": { "type": "boolean" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["mobileNumber"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/daily_entries/{entryId}": {
+      "schema": "DailyEntry",
+      "description": "Private collection of daily entries for a specific user."
+    },
+    "/users/{userId}/profile": {
+      "schema": "UserProfile",
+      "description": "Private profile settings for the user."
+    }
+  }
+}
